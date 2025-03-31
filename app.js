@@ -5,6 +5,22 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
 const { Sequelize } = require('sequelize');
+const TelegramBot = require('node-telegram-bot-api');
+
+const TOKEN = '8177542388:AAEjYHcJ_iSfv7MmlDEuDoi_kBNtT5OfSA8';
+const CHANNEL_ID = '@tno_community';
+const bot = new TelegramBot(TOKEN, { polling: false });
+
+// Проверка подписки
+async function checkSubscription(userId) {
+  try {
+    const member = await bot.getChatMember(CHANNEL_ID, userId);
+    return ['member', 'administrator', 'creator'].includes(member.status);
+  } catch (error) {
+    console.error('Telegram API Error:', error.message);
+    return false;
+  }
+}
 
 // Импорт роутов
 const authRoutes = require('./routes/auth');
@@ -38,6 +54,22 @@ app.use('/api/user', balanceRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/clans', clansRoutes);
 app.use('/api/test', avatarRoutes);
+// API Endpoint
+app.post('/check-subscription', async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    
+    if (!userId) {
+      return res.status(400).json({ error: 'User ID is required' });
+    }
+
+    const isSubscribed = await checkSubscription(userId);
+    res.json({ isSubscribed });
+    
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 
 // Инициализация Sequelize
