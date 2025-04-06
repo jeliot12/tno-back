@@ -25,9 +25,22 @@ module.exports = {
         unique: true
       },
       balance: {
-        type: Sequelize.FLOAT,
+        type: Sequelize.BIGINT,
         defaultValue: 0
       },
+      energy: {
+        type: Sequelize.INTEGER,
+        defaultValue: 800, // начальная энергия
+      },
+      maxEnergy: {
+        type: Sequelize.INTEGER,
+        defaultValue: 800, // максимальная энергия
+      },
+      lastUpdate: {
+        type: Sequelize.DATE,
+        defaultValue: Sequelize.NOW, // время последнего обновления
+      },
+      energyRegenRate: { type: Sequelize.INTEGER, defaultValue: 1 },
       referrerId: {
         type: Sequelize.INTEGER,
         allowNull: true,

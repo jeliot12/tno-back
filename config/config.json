@@ -2,8 +2,8 @@
   "development": {
     "username": "postgres",
     "password": "root",
-    "database": "tno_users",
-    "host": "127.0.0.1",
+    "database": "test_user",
+    "host": "localhost",
     "dialect": "postgres"
   }
 }
