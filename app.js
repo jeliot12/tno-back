@@ -33,6 +33,7 @@ const statsRoutes = require('./routes/stats');
 const clansRoutes = require('./routes/clans');
 const avatarRoutes = require('./routes/avatar');
 const energyRoutes = require('./routes/energy');
+const checkuserRoutes = require('./routes/check-user')
 
 // Инициализация Express
 const app = express();
@@ -58,6 +59,7 @@ app.use('/api/user', balanceRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/clans', clansRoutes);
 app.use('/api/test', avatarRoutes);
+app.use('/api/user', checkuserRoutes);
 
 
 // API Endpoint
