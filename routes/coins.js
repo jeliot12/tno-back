@@ -2,9 +2,10 @@ const { User } = require('../models');
 const express = require('express');
 const router = express.Router();
 
-router.get('/coins', async (req, res) => {
+router.get('/coins/:telegramId', async (req, res) => {
+    const telegramId = req.params.telegramId;
     try {
-      const user = await User.findByPk(28);
+      const user = await User.findOne({ where: { telegramId } });
       if (!user) {
         return res.status(404).json({ error: 'User not found' });
       }
@@ -23,8 +24,7 @@ router.post('/coins', async (req, res) => {
         return res.status(400).json({ error: 'Invalid coins value' });
       }
   
-      const [user, created] = await User.upsert({
-        id: 28,
+      const [user] = await User.upsert({
         telegramId: telegramId,
         username: username,
         balance: balance

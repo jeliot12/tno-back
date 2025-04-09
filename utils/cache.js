@@ -12,7 +12,7 @@ function setCachedUser(telegramId, data, ttl = 300000) {
 function calculateEnergy(user) {
   const now = new Date();
   const timeDiff = Math.floor((now - user.lastUpdate) / 1000); // разница в секундах
-  const regenRate = 1 / 5; // 1 энергия за 20 секунд
+  const regenRate = 1 / 3; // 1 энергия за 20 секунд
   const regeneratedEnergy = Math.floor(timeDiff * regenRate);
   const newEnergy = Math.min(user.energy + regeneratedEnergy, user.maxEnergy);
 
