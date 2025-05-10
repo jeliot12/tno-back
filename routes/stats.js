@@ -21,4 +21,31 @@ router.get('/top', async (req, res) => {
   }
 });
 
+router.post('/listReferrer', async (req, res) => {
+  try {
+    const {telegramId} = req.body
+
+    const user = await User.findOne({
+      where: { telegramId },
+      attributes: ['id'],
+      raw: true // Возвращает простой объект вместо экземпляра модели
+    });
+
+    const users = await User.findAll({
+      where: {
+        referrerId: user.id
+      }
+    });
+
+    if (!users){
+      res.status(600).json({ error: 'Not found referral' });
+    }
+
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching referral:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

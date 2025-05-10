@@ -21,7 +21,6 @@ module.exports = (sequelize, DataTypes) => {
         }
       }
     });
-  
     Referral.associate = (models) => {
       Referral.belongsTo(models.User, {
         foreignKey: 'referrerId',
@@ -33,6 +32,6 @@ module.exports = (sequelize, DataTypes) => {
         as: 'referee'
       });
     };
-  
+
     return Referral;
   };

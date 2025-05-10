@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('Clans', {
@@ -22,6 +20,11 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true
       },
+      totalCount: {
+        type: Sequelize.INTEGER,
+        defaultValue: 0,
+        allowNull: false,
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false,
@@ -32,14 +35,6 @@ module.exports = {
       },
     });
 
-    await queryInterface.addConstraint('Users', {
-      fields: ['clanId'],
-      type: 'foreign key',
-      references: { table: 'Clans', field: 'id' },
-      onDelete: 'SET NULL',
-      onUpdate: 'CASCADE',
-    });
-
     await queryInterface.addConstraint('Clans', {
       fields: ['creatorId'],
       type: 'foreign key',
@@ -47,8 +42,16 @@ module.exports = {
       onDelete: 'CASCADE',
       onUpdate: 'CASCADE',
     });
-  },
-  down: async (queryInterface) => {
-    await queryInterface.dropTable('Clans');
-  },
+
+    await queryInterface.addConstraint('Users', {
+      fields: ['clanId'],
+      type: 'foreign key',
+      references: { table: 'Clans', field: 'id' },
+      onDelete: 'SET NULL',
+      onUpdate: 'CASCADE',
+    });
+    },
+    down: async (queryInterface) => {
+      await queryInterface.dropTable('Clans');
+    },
 };

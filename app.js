@@ -4,15 +4,21 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
+const bodyParser = require('body-parser');
 const { Sequelize } = require('sequelize');
 const TelegramBot = require('node-telegram-bot-api');
 const WebSocket = require('ws');
 const { User } = require('./models');
+const multer = require('multer');
+const upload = multer({ storage: multer.memoryStorage() });
+const FormData = require('form-data');
+const axios = require('axios');
 
-const TOKEN = '8177542388:AAEjYHcJ_iSfv7MmlDEuDoi_kBNtT5OfSA8';
+const TOKEN = process.env.TELEGRAM_BOT_TOKEN
 const CHANNEL_ID = '@tno_community';
 const bot = new TelegramBot(TOKEN, { polling: false });
 const WS_PORT = 8176;
+const CHAT_ID = '-4690338550'
 
 // Проверка подписки
 async function checkSubscription(userId) {
@@ -25,6 +31,26 @@ async function checkSubscription(userId) {
   }
 }
 
+async function bonusUser(telegramId, username, amount) {
+
+  try {
+    const updatedCount = await User.increment('balance', {
+      by: Number(amount), // Указываем, на сколько увеличить
+      where: { telegramId, username },
+      returning: true, // Возвращает обновлённую запись (PostgreSQL)
+    });
+
+    if (updatedCount === 0) {
+      console.error("User not found");
+    }
+
+    console.log("success: true")
+  } catch (error) {
+    console.error(error);
+    console.log("server errpr")
+  }  
+}
+
 // Импорт роутов
 const authRoutes = require('./routes/auth');
 const referralRoutes = require('./routes/referral');
@@ -35,6 +61,7 @@ const avatarRoutes = require('./routes/avatar');
 const energyRoutes = require('./routes/energy');
 const checkuserRoutes = require('./routes/check-user')
 const coinRouter = require("./routes/coins");
+const earnRouter = require("./routes/earn");
 
 // Инициализация Express
 const app = express();
@@ -50,7 +77,7 @@ app.use(cors({
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static(path.join(__dirname, 'public/uploads')));
-app.use(express.json()); // Парсинг JSON
+app.use(bodyParser.json()); // Парсинг JSON
 app.use(morgan('combined')); // Логирование запросов
 
 // Подключение роутов
@@ -62,26 +89,74 @@ app.use('/api/clans', clansRoutes);
 app.use('/api/test', avatarRoutes);
 app.use('/api/user', checkuserRoutes);
 app.use('/api', coinRouter);
+app.use('/api/energy', energyRoutes);
+app.use('/api/check', earnRouter);
 
-
-// API Endpoint
-app.post('/check-subscription', async (req, res) => {
+app.post('/api/check-subscription', async (req, res) => {
   try {
-    const userId = req.body.userId;
-    
+    const {userId, username} = req.body;
+    const telegramId = userId.toString()
     if (!userId) {
       return res.status(400).json({ error: 'User ID is required' });
     }
 
     const isSubscribed = await checkSubscription(userId);
-    res.json({ isSubscribed });
+    if (isSubscribed){
+      console.log("work");
+      const [affectedRows] = await User.update(
+        { isSubscribed: isSubscribed },
+        {
+          where: { telegramId },
+          returning: true, // Для PostgreSQL возвращает обновленную запись
+        }
+      );
+      if (affectedRows === 0) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      await bonusUser(telegramId, username, 3000)
+    }
+    res.json({ isSubscribed});
     
   } catch (error) {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-app.use('/api/energy', energyRoutes);
+app.post('/api/createSquad-to-telegram', upload.single('photo'), async (req, res) => {
+  try {
+    const { title, description, telegramId } = req.body;
+    const photo = req.file;
+
+    let message = `Заявка на создание сквада:\n\nЗаголовок: ${title}\nОписание: ${description}\nВладелец: ${telegramId}`;
+
+    if (photo) {
+      const formData = new FormData();
+      formData.append('chat_id', CHAT_ID);
+      formData.append('caption', message);
+      formData.append('photo', photo.buffer, { filename: photo.originalname, contentType: photo.mimetype });
+
+      const headers = {
+        ...formData.getHeaders(),
+        'Content-Length': formData.getLengthSync()
+      };
+
+      await axios.post(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, formData, {
+        headers: headers
+      });
+    } else {
+      await axios.post(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+        chat_id: CHAT_ID,
+        text: message
+      });
+    }
+
+    res.status(200).send('OK');
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error');
+  }
+});
+
 
 const clients = new Map();
 app.set('clients', clients); // Делаем clients доступным для маршрутов

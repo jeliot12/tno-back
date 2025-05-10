@@ -4,7 +4,7 @@ module.exports = {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
-        autoIncrement: true
+        autoIncrement: true,
       },
       telegramId: {
         type: Sequelize.STRING,
@@ -25,7 +25,7 @@ module.exports = {
         unique: true
       },
       balance: {
-        type: Sequelize.BIGINT,
+        type: Sequelize.INTEGER,
         defaultValue: 0
       },
       energy: {
@@ -58,6 +58,16 @@ module.exports = {
         allowNull: false,
         defaultValue: false
       },
+      isSubscribed: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+      isInvite: {
+        type: Sequelize.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
       createdAt: {
         type: Sequelize.DATE,
         allowNull: false
@@ -68,8 +78,7 @@ module.exports = {
       }
     });
   },
-
   down: async (queryInterface) => {
     await queryInterface.dropTable('Users');
-  }
+  },
 };

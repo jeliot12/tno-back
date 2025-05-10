@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         unique: true
       },
       balance: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.INTEGER,
         defaultValue: 0
       },
       energy: {
@@ -44,13 +44,74 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: true
       },
+      clanId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+      },
       isPremium: {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: false
+      },
+      isSubscribed: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+      isInvite: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
+      },
+    });
+
+    User.addHook('afterCreate', async (user) => {
+      if (user.clanId) {
+        const clan = await sequelize.models.Clan.findByPk(user.clanId);
+        if (clan) {
+          clan.totalCount += user.balance;
+          await clan.save();
+        }
       }
     });
-  
+
+    User.addHook('afterUpdate', async (user, options) => {
+      const previous = user._previousDataValues;
+      if (previous.clanId !== user.clanId) {
+        if (previous.clanId) {
+          const oldClan = await sequelize.models.Clan.findByPk(previous.clanId);
+          if (oldClan) {
+            oldClan.totalCount -= previous.balance;
+            await oldClan.save();
+          }
+        }
+        if (user.clanId) {
+          const newClan = await sequelize.models.Clan.findByPk(user.clanId);
+          if (newClan) {
+            newClan.totalCount += user.balance;
+            await newClan.save();
+          }
+        }
+      } else if (previous.balance !== user.balance && user.clanId) {
+        const clan = await sequelize.models.Clan.findByPk(user.clanId);
+        if (clan) {
+          const difference = user.balance - previous.balance;
+          clan.totalCount += difference;
+          await clan.save();
+        }
+      }
+    });
+
+    User.addHook('beforeDestroy', async (user) => {
+      if (user.clanId) {
+        const clan = await sequelize.models.Clan.findByPk(user.clanId);
+        if (clan) {
+          clan.totalCount -= user.balance;
+          await clan.save();
+        }
+      }
+    });
+
     User.associate = (models) => {
       User.hasMany(models.Referral, {
         foreignKey: 'referrerId',
@@ -62,6 +123,6 @@ module.exports = (sequelize, DataTypes) => {
         as: 'referrer'
       });
     };
-  
+    
     return User;
   };

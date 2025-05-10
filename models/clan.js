@@ -15,15 +15,20 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false,
     },
     referralCode: { type: DataTypes.STRING, unique: true, allowNull: false },
+    avatarUrl: {
+      type: DataTypes.STRING,
+      allowNull: true
+    },
+    totalCount: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false,
+    },
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
     },
-    avatarUrl: {
-      type: DataTypes.STRING,
-      allowNull: true
-    }
   });
-
+  
   return Clan;
 };

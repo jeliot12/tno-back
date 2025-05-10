@@ -1,4 +1,3 @@
-// migrations/YYYYMMDDHHMMSS-add-avatar-to-users.js
 module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.addColumn('Clans', 'avatarUrl', {
