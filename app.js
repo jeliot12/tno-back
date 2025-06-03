@@ -62,6 +62,7 @@ const energyRoutes = require('./routes/energy');
 const checkuserRoutes = require('./routes/check-user')
 const coinRouter = require("./routes/coins");
 const earnRouter = require("./routes/earn");
+const userRouter = require("./routes/user");
 
 // Инициализация Express
 const app = express();
@@ -91,6 +92,7 @@ app.use('/api/user', checkuserRoutes);
 app.use('/api', coinRouter);
 app.use('/api/energy', energyRoutes);
 app.use('/api/check', earnRouter);
+app.use('/api/identification', userRouter);
 
 app.post('/api/check-subscription', async (req, res) => {
   try {

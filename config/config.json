@@ -1,8 +1,8 @@
 {
   "development": {
-    "username": "jasur",
-    "password": "4035",
-    "database": "users_tno",
+    "username": "postgres",
+    "password": "root",
+    "database": "game_clans_db",
     "host": "localhost",
     "dialect": "postgres"
   }

@@ -37,5 +37,6 @@ router.post('/check-user', async (req, res) => {
     res.status(500).json({ error: 'Внутренняя ошибка сервера' });
   }
 });
+
   
 module.exports = router;

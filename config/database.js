@@ -1,8 +1,8 @@
 module.exports = {
     development: {
-      username: 'jasur', // Replace with your PostgreSQL username (e.g., 'postgres')
-      password: '4035', // Replace with your password (or null if none)
-      database: 'users_tno',
+      username: 'postgres', // Replace with your PostgreSQL username (e.g., 'postgres')
+      password: 'root', // Replace with your password (or null if none)
+      database: 'game_clans_db',
       host: 'localhost',
       dialect: 'postgres',
     },
